@@ -143,6 +143,7 @@ export class KnexService {
       for (const item of data) {
         const keyValue = item[key];
         if (keyValue === undefined || keyValue === null) {
+          // Missing key; skip this item
           continue;
         }
 
@@ -232,6 +233,8 @@ export class KnexService {
       },
     };
   }
+
+  // Configuration is provided via constructor
 
   async testConnection(): Promise<void> {
     await this.knex.raw('SELECT 1');
