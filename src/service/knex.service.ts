@@ -1,10 +1,29 @@
 import knex, { Knex } from 'knex';
-import type { KnexConfig } from '../interfaces/knex-config.interface';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 export class KnexService {
   public readonly knex: Knex;
 
-  constructor(config: KnexConfig) {
+  constructor() {
+    const config: Knex.Config = {
+      client: process.env.DB_CLIENT || 'pg',
+      connection: {
+        host: process.env.DB_HOST,
+        port: parseInt(process.env.DB_PORT || '5432'),
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME,
+        ssl:
+          process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+      },
+      pool: {
+        min: parseInt(process.env.DB_POOL_MIN || '2'),
+        max: parseInt(process.env.DB_POOL_MAX || '10'),
+      },
+    };
+
     this.knex = knex(config);
   }
 
@@ -143,7 +162,6 @@ export class KnexService {
       for (const item of data) {
         const keyValue = item[key];
         if (keyValue === undefined || keyValue === null) {
-          // Missing key; skip this item
           continue;
         }
 
@@ -233,8 +251,6 @@ export class KnexService {
       },
     };
   }
-
-  // Configuration is provided via constructor
 
   async testConnection(): Promise<void> {
     await this.knex.raw('SELECT 1');
