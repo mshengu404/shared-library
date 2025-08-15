@@ -1,5 +1,6 @@
 import knex, { Knex } from 'knex';
 import * as dotenv from 'dotenv';
+import { ObjectUtility } from '../helpers/index';
 
 dotenv.config();
 
@@ -21,6 +22,15 @@ export class KnexService {
       pool: {
         min: parseInt(process.env.DB_POOL_MIN || '2'),
         max: parseInt(process.env.DB_POOL_MAX || '10'),
+      },
+      postProcessResponse: (result) => {
+        if (Array.isArray(result)) {
+          return result.map((row) =>
+            ObjectUtility.convertKeys(row, ObjectUtility.CAMEL_CASE)
+          );
+        } else {
+          return ObjectUtility.convertKeys(result, ObjectUtility.CAMEL_CASE);
+        }
       },
     };
 
